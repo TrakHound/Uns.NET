@@ -180,3 +180,29 @@ plcNamespaceConfig.Type = NamespaceType.Functional;
 plcNamespaceConfig.ContentType = NamespaceContentType.SPARKPLUG_B;
 client.AddNamespace(plcNamespaceConfig);
 ```
+
+## Middleware
+Middleware is used to filter, transform, etc. events that are either sent or received.
+
+### UnsReportByExceptionMiddleware
+Report by Exception (RBE) is a fundamental principle of a Unified Namespace as it reduces the amount of data sent over the network by filtering out duplicate data.
+```c#
+// Add RBE Middleware to a UnsClient
+client.AddMiddleware(new UnsReportByExceptionMiddleware());
+```
+
+### UnsDeadbandValueMiddleware
+A Value Deadband filter is used to filter out values that havent' changed by the specified MinimumDelta. This can be used to filter out "noise" as well as reduce the amount of data sent that may be negligible.
+```c#
+// Add a Value Deadband filter to a UnsClient to filter
+// requests whose value hasn't changed by more than +/- 10
+client.AddMiddleware(new UnsDeadbandValueMiddleware(10));
+```
+
+### UnsDeadbandPeriodMiddleware
+A Period Deadband filter is used to filter out values that havent' changed within the specified MinimumPeriod time span. This can be used to filter out "noise" as well as reduce the amount of data sent that may be negligible.
+```c#
+// Add a Period Deadband filter to a UnsClient to filter
+// requests whose value hasn't changed in the last 5 seconds
+client.AddMiddleware(new UnsDeadbandPeriodMiddleware(TimeSpan.FromSeconds(5)));
+```
