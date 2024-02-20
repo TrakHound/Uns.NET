@@ -36,6 +36,23 @@ using Uns;
 
 var client = new UnsClient();
 
+// Add Middleware
+client.AddMiddleware(new UnsReportByExceptionMiddleware());
+client.AddMiddleware(new UnsDeadbandPeriodMiddleware(TimeSpan.FromSeconds(5)));
+client.AddMiddleware(new UnsDeadbandValueMiddleware(10));
+
+// Add Namespace Configurations
+var mesNamespaceConfig = new NamespaceConfiguration();
+mesNamespaceConfig.Path = "Plant1/Area3/Line4/MES";
+mesNamespaceConfig.Kind = NamespaceKind.Heterogenous;
+mesNamespaceConfig.Type = NamespaceType.Functional;
+client.AddNamespace(mesNamespaceConfig);
+
+var plcNamespaceConfig = new NamespaceConfiguration();
+plcNamespaceConfig.Path = "Plant1/Area3/Line4/Cell2/PLC";
+plcNamespaceConfig.Kind = NamespaceKind.Heterogenous;
+plcNamespaceConfig.Type = NamespaceType.Functional;
+client.AddNamespace(plcNamespaceConfig);
 
 // Add MQTT (Plain) Connection
 var mqttConnection = new UnsMqttConnection("localhost", 1883);

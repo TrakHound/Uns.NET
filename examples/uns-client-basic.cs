@@ -3,6 +3,10 @@ using Uns;
 
 var client = new UnsClient();
 
+client.AddMiddleware(new UnsReportByExceptionMiddleware());
+client.AddMiddleware(new UnsDeadbandPeriodMiddleware(TimeSpan.FromSeconds(5)));
+client.AddMiddleware(new UnsDeadbandValueMiddleware(10));
+
 var erpNamespaceConfig = new NamespaceConfiguration();
 erpNamespaceConfig.Path = "Plant1/ERP";
 erpNamespaceConfig.Kind = NamespaceKind.Homogeneous;
