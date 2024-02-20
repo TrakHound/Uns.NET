@@ -23,7 +23,7 @@
 		<Copyright>Copyright (c) 2024 TrakHound Inc., All Rights Reserved.</Copyright>
 		<RepositoryUrl>https://github.com/TrakHound/MTConnect.NET</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<Description>Uns.NET-Mqtt contains classes for implementing MQTT in a Unified Namespace. Supports .NET Framework 4.6.1 up to .NET 8</Description>
+		<Description>Uns.NET contains classes for implementing a Unified Namespace for use with IIoT. Supports .NET 6 up to .NET 8</Description>
 		<PackageProjectUrl>https://www.TrakHound.com</PackageProjectUrl>
 		<PackageTags>iiot;iot;mqtt;sparkplug;unified-namespace;uns;</PackageTags>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
