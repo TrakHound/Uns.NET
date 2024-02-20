@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Uns.NET-Common\Uns.NET-Common.csproj" />
+    <ProjectReference Include="..\Uns.NET-Mqtt\Uns.NET-Mqtt.csproj" />
+    <ProjectReference Include="..\Uns.NET-SparkplugB\Uns.NET-SparkplugB.csproj" />
+  </ItemGroup>
+
+</Project>
