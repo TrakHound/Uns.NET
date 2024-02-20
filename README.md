@@ -1,5 +1,6 @@
 <img src="img/uns-net-logo-text-01.png" style="width: 350px;">
 
+
 # Overview
 .NET SDK for implementing a Unified Namespace for use with IIOT. Supports plain MQTT and SparkplugB.
 
@@ -7,6 +8,11 @@
 - Subscribe & Publish with SparkplugB using standardized Paths
 - Apply Namespace configuration based on Path
 - Implement Middleware such as Report By Exception, Unit Conversion, etc.
+
+# Nuget
+```
+dotnet add package Uns.NET --version 0.1.0-beta
+```
 
 # UnsClient
 The UnsClient class is the primary class that handles Connections, Namespace Configurations, and Subscriptions. The UnsClient allows an application to Subscribe and Publish data in the form of a standardized **UnsEventMessage**. A UnsEventMessage contains the content of the message along with information about the Namespace and Connection.
