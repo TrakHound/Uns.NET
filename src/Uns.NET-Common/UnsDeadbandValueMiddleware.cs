@@ -9,7 +9,6 @@ namespace Uns
     public class UnsDeadbandValueMiddleware : IUnsClientMiddleware
     {
         private readonly double _minimumDelta;
-        private readonly string _pattern;
         private readonly Dictionary<string, double> _cache = new Dictionary<string, double>();
         private readonly object _lock = new object();
 
@@ -17,10 +16,9 @@ namespace Uns
         public string Id => "DEADBAND_VALUE";
 
 
-        public UnsDeadbandValueMiddleware(double minimumDelta, string pattern = null)
+        public UnsDeadbandValueMiddleware(double minimumDelta)
         {
             _minimumDelta = minimumDelta;
-            _pattern = pattern;
         }
 
 
@@ -28,13 +26,13 @@ namespace Uns
         {
             if (e.Content != null)
             {
-                if (double.TryParse(e.Content, out var value))
+                if (double.TryParse(GetValueString(e.Content), out var value))
                 {
                     lock (_lock)
                     {
                         if (_cache.ContainsKey(e.Path))
                         {
-                            var existing = _cache.GetValueOrDefault(e.Path);
+                            _cache.TryGetValue(e.Path, out var existing);
                             if (Math.Abs(value - existing) >= _minimumDelta)
                             {
                                 _cache.Remove(e.Path);
@@ -51,6 +49,17 @@ namespace Uns
                     }
                 }
             }
+
+            return null;
+        }
+
+        private static string GetValueString(byte[] content)
+        {
+            try
+            {
+                return System.Text.Encoding.UTF8.GetString(content);
+            }
+            catch { }
 
             return null;
         }

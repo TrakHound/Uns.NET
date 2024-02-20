@@ -101,7 +101,7 @@ namespace Uns
             if (!string.IsNullOrEmpty(path))
             {
                 // Check cache for namespace ID (Path)
-                var cachedId = _namespaceCache.GetValueOrDefault(path);
+                _namespaceCache.TryGetValue(path, out var cachedId);
                 if (cachedId == null)
                 {
                     foreach (var configuration in _namespaces.Values.OrderByDescending(o => o.Path))
@@ -117,7 +117,8 @@ namespace Uns
                 }
                 else
                 {
-                    return _namespaces.GetValueOrDefault(cachedId);
+                    _namespaces.TryGetValue(cachedId, out var configuration);
+                    return configuration;
                 }
             }
 
@@ -191,7 +192,8 @@ namespace Uns
         {
             if (!string.IsNullOrEmpty(connectionId))
             {
-                return _inputConnections.GetValueOrDefault(connectionId);
+                _inputConnections.TryGetValue(connectionId, out var connection);
+                return connection;
             }
 
             return null;
@@ -201,7 +203,8 @@ namespace Uns
         {
             if (!string.IsNullOrEmpty(connectionId))
             {
-                return _outputConnections.GetValueOrDefault(connectionId);
+                _outputConnections.TryGetValue(connectionId, out var connection);
+                return connection;
             }
 
             return null;
@@ -322,15 +325,15 @@ namespace Uns
                         {
                             matched = true;
                         }
-                        else if (pattern.EndsWith('#'))
+                        else if (pattern.EndsWith("#"))
                         {
                             matched = UnsPath.IsChildOf(pattern.Remove(pattern.Length - 2), path);
                         }
-                        else if (pattern.EndsWith('+'))
+                        else if (pattern.EndsWith("+"))
                         {
                             matched = UnsPath.GetParentPath(path) == pattern.Remove(pattern.Length - 2);
                         }
-                        else if (!pattern.StartsWith('/'))
+                        else if (!pattern.StartsWith("/"))
                         {
                             matched = UnsPath.GetObject(path) == pattern;
                         }
@@ -451,7 +454,7 @@ namespace Uns
         {
             if (!string.IsNullOrEmpty(connectionId) && !string.IsNullOrEmpty(message.Path) && message.Content != null && message.Content.Length > 0)
             {
-                var connection = _outputConnections.GetValueOrDefault(connectionId);
+                _outputConnections.TryGetValue(connectionId, out var connection);
                 if (connection != null)
                 {
                     var sendMessage = ProcessMiddleware(message);

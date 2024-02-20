@@ -14,8 +14,6 @@ namespace Uns
 {
     public static class Json
     {
-        #region "Conversion"
-
         public static JsonSerializerOptions DefaultOptions
         {
             get
@@ -193,103 +191,5 @@ namespace Uns
 
             return b;
         }
-
-        #endregion
-
-        #region "IO"
-
-        public static T Read<T>(string path)
-        {
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
-            {
-                try
-                {
-                    var json = File.ReadAllText(path);
-                    return Convert<T>(json);
-                }
-                catch { }
-            }
-
-            return default;
-        }
-
-        public static T Read<T>(string path, string node)
-        {
-            if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(node) && File.Exists(path))
-            {
-                try
-                {
-                    var json = File.ReadAllText(path);
-                    var d = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
-                    if (d != null)
-                    {
-                        var ld = new Dictionary<string, object>();
-                        foreach (var entry in d)
-                        {
-                            ld.Add(entry.Key.ToLower(), entry.Value);
-                        }
-
-                        var n = ld.GetValueOrDefault(node.ToLower());
-                        if (n != null)
-                        {
-                            var nodeJson = JsonSerializer.Serialize(n, DefaultOptions);
-                            if (!string.IsNullOrEmpty(nodeJson))
-                            {
-                                return JsonSerializer.Deserialize<T>(nodeJson, DefaultOptions);
-                            }
-                        }
-                    }
-                }
-                catch { }
-            }
-
-            return default;
-        }
-
-        public static async Task<T> ReadAsync<T>(string path)
-        {
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
-            {
-                try
-                {
-                    var json = await File.ReadAllTextAsync(path);
-                    return Convert<T>(json);
-                }
-                catch { }
-            }
-
-            return default;
-        }
-
-
-        public static void Write(object obj, string path)
-        {
-            if (obj != null && !string.IsNullOrEmpty(path))
-            {
-                var json = Convert(obj, indented: true);
-                if (!string.IsNullOrEmpty(json))
-                {
-                    try
-                    {
-                        File.WriteAllText(path, json);
-                    }
-                    catch { }
-                }
-            }
-        }
-
-        public static async Task WriteAsync(object obj, string path, CancellationToken cancellationToken)
-        {
-            if (obj != null && !string.IsNullOrEmpty(path))
-            {
-                var json = Convert(obj, indented: true);
-                if (!string.IsNullOrEmpty(json))
-                {
-                    await File.WriteAllTextAsync(path, json, cancellationToken);
-                }
-            }
-        }
-
-        #endregion
     }
 }

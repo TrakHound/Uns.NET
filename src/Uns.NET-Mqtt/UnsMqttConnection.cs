@@ -171,7 +171,7 @@ namespace Uns
                     var publishMessage = new MqttApplicationMessage();
                     publishMessage.Topic = UnsPath.Combine(destination.Topic, message.Path);
                     //message.Retain = retain;
-                    publishMessage.PayloadSegment = message.Content;
+                    publishMessage.Payload = message.Content;
 
                     await Publish(publishMessage);
                 }

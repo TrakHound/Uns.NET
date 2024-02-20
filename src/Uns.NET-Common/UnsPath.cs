@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Uns
 {
@@ -19,15 +18,15 @@ namespace Uns
             {
                 return true;
             }
-            else if (pattern.EndsWith('#'))
+            else if (pattern.EndsWith("#"))
             {
                 return IsChildOf(pattern.Remove(pattern.Length - 2), path);
             }
-            else if (pattern.EndsWith('+'))
+            else if (pattern.EndsWith("+"))
             {
                 return GetParentPath(path) == pattern.Remove(pattern.Length - 2);
             }
-            else if (!pattern.StartsWith('/'))
+            else if (!pattern.StartsWith("/"))
             {
                 return GetObject(path) == pattern;
             }
@@ -53,7 +52,7 @@ namespace Uns
                     }
                 }
 
-                return string.Join(PathSeparator, p).TrimEnd(PathSeparator);
+                return string.Join(new string(new char[] { PathSeparator }), p).TrimEnd(PathSeparator);
             }
 
             return null;
@@ -93,12 +92,45 @@ namespace Uns
             return path;
         }
 
-        public static string GetRelativeTo(string relativePath, string path)
+        public static string GetRelativeTo(string relativeToPath, string path)
         {
-            if (!string.IsNullOrEmpty(relativePath) && !string.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(relativeToPath) && !string.IsNullOrEmpty(path))
             {
-                var result = System.IO.Path.GetRelativePath(relativePath, path);
-                return result?.Replace('\\', '/');
+                var relativeToParts = relativeToPath.Split(PathSeparator);
+                var parts = path.Split(PathSeparator);
+                if (!relativeToParts.IsNullOrEmpty() && !parts.IsNullOrEmpty() && parts.Length >= relativeToParts.Length)
+                {
+                    var isMatch = false;
+                    var x = 0;
+
+                    for (var i = 0; i < relativeToParts.Length; i++)
+                    {
+                        var relativeToPart = relativeToParts[i];
+                        var part = parts[i];
+
+                        if (relativeToPart == part) x++;
+                        else break;
+
+                        if (i == relativeToParts.Length - 1) isMatch = true;
+                    }
+
+                    if (isMatch)
+                    {
+                        var relativeParts = new string[parts.Length - x];
+                        var j = 0;
+                        for (var i = x; i < parts.Length; i++)
+                        {
+                            relativeParts[j] = parts[i];
+                            j++;
+                        }
+
+                        return string.Join(new string(new char[] { PathSeparator }), relativeParts);
+                    }
+                }
+
+
+                //var result = System.IO.Path.GetRelativePath(relativePath, path);
+                //return result?.Replace('\\', '/');
             }
 
             return path;
@@ -110,16 +142,19 @@ namespace Uns
             {
                 var paths = new List<string>();
 
-                var parts = path.Split(PathSeparator, StringSplitOptions.RemoveEmptyEntries);
+                var parts = path.Split(PathSeparator);
                 if (!parts.IsNullOrEmpty())
                 {
                     for (var i = 0; i < parts.Length; i++)
                     {
-                        // Add Parent Paths
-                        var partpaths = new List<string>();
-                        for (var j = 0; j <= i; j++) partpaths.Add(parts[j]);
+                        if (!string.IsNullOrEmpty(parts[i]))
+                        {
+                            // Add Parent Paths
+                            var partpaths = new List<string>();
+                            for (var j = 0; j <= i; j++) partpaths.Add(parts[j]);
 
-                        paths.Add(string.Join(PathSeparator, partpaths));
+                            paths.Add(string.Join(new string(new char[] { PathSeparator }), partpaths));
+                        }
                     }
                 }
 

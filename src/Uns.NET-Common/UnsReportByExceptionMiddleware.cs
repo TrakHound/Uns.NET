@@ -18,7 +18,7 @@ namespace Uns
         {
             lock (_lock)
             {
-                var existing = _cache.GetValueOrDefault(e.Path);
+                _cache.TryGetValue(e.Path, out var existing);
                 if (existing == null || !ObjectExtensions.ByteArraysEqual(existing, e.Content))
                 {
                     _cache.Remove(e.Path);

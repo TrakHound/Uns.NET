@@ -66,13 +66,13 @@ namespace Uns
                             object obj = DateTime.Parse(text);
                             return (TResult)obj;
                         }
-                        else if (typeof(Enum).IsAssignableFrom(type))
-                        {
-                            if (Enum.TryParse(type, (string)text, true, out var result))
-                            {
-                                return (TResult)result;
-                            }
-                        }
+                        //else if (typeof(Enum).IsAssignableFrom(type))
+                        //{
+                        //    if (Enum.TryParse(type, (string)text, true, out object result))
+                        //    {
+                        //        return (TResult)result;
+                        //    }
+                        //}
                         else
                         {
                             return (TResult)Convert.ChangeType(text, type);

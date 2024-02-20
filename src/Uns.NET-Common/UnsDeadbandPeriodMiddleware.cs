@@ -9,7 +9,6 @@ namespace Uns
     public class UnsDeadbandPeriodMiddleware : IUnsClientMiddleware
     {
         private readonly TimeSpan _minimumPeriod;
-        private readonly string _pattern;
         private readonly Dictionary<string, DateTime> _cache = new Dictionary<string, DateTime>();
         private readonly object _lock = new object();
 
@@ -17,10 +16,9 @@ namespace Uns
         public string Id => "DEADBAND_PERIOD";
 
 
-        public UnsDeadbandPeriodMiddleware(TimeSpan minimumPeriod, string pattern = null)
+        public UnsDeadbandPeriodMiddleware(TimeSpan minimumPeriod)
         {
             _minimumPeriod = minimumPeriod;
-            _pattern = pattern;
         }
 
 
@@ -32,7 +30,7 @@ namespace Uns
                 {
                     if (_cache.ContainsKey(e.Path))
                     {
-                        var existingTimestamp = _cache.GetValueOrDefault(e.Path);
+                        _cache.TryGetValue(e.Path, out var existingTimestamp);
                         if (e.Timestamp - existingTimestamp >= _minimumPeriod)
                         {
                             _cache.Remove(e.Path);

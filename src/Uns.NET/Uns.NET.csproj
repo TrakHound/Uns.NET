@@ -1,15 +1,68 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<TargetFrameworks>net8.0</TargetFrameworks>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+		<DebugSymbols>false</DebugSymbols>
+		<DebugType>None</DebugType>
+		<Optimize>true</Optimize>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Package'">
+		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+		<Optimize>true</Optimize>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Uns.NET-Common\Uns.NET-Common.csproj" />
-    <ProjectReference Include="..\Uns.NET-Mqtt\Uns.NET-Mqtt.csproj" />
-    <ProjectReference Include="..\Uns.NET-SparkplugB\Uns.NET-SparkplugB.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<RootNamespace>Uns</RootNamespace>
+		<Configurations>Debug;Release;Package</Configurations>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Authors>TrakHound</Authors>
+		<Company>TrakHound Inc.</Company>
+		<Copyright>Copyright (c) 2024 TrakHound Inc., All Rights Reserved.</Copyright>
+		<RepositoryUrl>https://github.com/TrakHound/MTConnect.NET</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<Description>Uns.NET-Mqtt contains classes for implementing MQTT in a Unified Namespace. Supports .NET Framework 4.6.1 up to .NET 8</Description>
+		<PackageProjectUrl>https://www.TrakHound.com</PackageProjectUrl>
+		<PackageTags>iiot;iot;mqtt;sparkplug;unified-namespace;uns;</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageIconUrl>https://static.trakhound.com/mtconnect-net-nuget.png</PackageIconUrl>
+
+		<!-- Optional: Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+		<!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+		<!-- Optional: Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(Configuration)'=='Debug'">
+		<Compile Include="..\..\build\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<Compile Include="..\..\build\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Package'">
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Uns.NET-Common\Uns.NET-Common.csproj" />
+		<ProjectReference Include="..\Uns.NET-Mqtt\Uns.NET-Mqtt.csproj" />
+		<ProjectReference Include="..\Uns.NET-SparkplugB\Uns.NET-SparkplugB.csproj" />
+	</ItemGroup>
 
 </Project>
