@@ -22,8 +22,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{DC
 		..\examples\uns-client-basic.cs = ..\examples\uns-client-basic.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp49", "C:\temp\ConsoleApp49\ConsoleApp49.csproj", "{CEB35B35-7065-4C76-886D-5AA560712C21}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,10 +44,6 @@ Global
 		{59676F84-4765-4F9E-A5AF-900C555DCDCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59676F84-4765-4F9E-A5AF-900C555DCDCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59676F84-4765-4F9E-A5AF-900C555DCDCA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CEB35B35-7065-4C76-886D-5AA560712C21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CEB35B35-7065-4C76-886D-5AA560712C21}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CEB35B35-7065-4C76-886D-5AA560712C21}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CEB35B35-7065-4C76-886D-5AA560712C21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
