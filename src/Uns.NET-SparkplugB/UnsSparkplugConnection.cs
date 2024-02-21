@@ -175,13 +175,16 @@ namespace Uns
             {
                 foreach (var metric in args.Metrics)
                 {
-                    var message = new UnsEventMessage();
-                    message.Path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.DeviceIdentifier}/{metric.Name}".Replace(':', '/');
-                    message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
-                    message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(metric));
-                    message.Timestamp = SparkplugTimestamp.ToDateTime(metric.Timestamp);
+                    if (metric.Name != "bdSeq")
+                    {
+                        var message = new UnsEventMessage();
+                        message.Path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.DeviceIdentifier}/{metric.Name}".Replace(':', '/');
+                        message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
+                        message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(metric));
+                        message.Timestamp = SparkplugTimestamp.ToDateTime(metric.Timestamp);
 
-                    ReceiveEvent(message);
+                        ReceiveEvent(message);
+                    }
                 }
             }
 
