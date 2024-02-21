@@ -206,3 +206,65 @@ A Period Deadband filter is used to filter out values that havent' changed withi
 // requests whose value hasn't changed in the last 5 seconds
 client.AddMiddleware(new UnsDeadbandPeriodMiddleware(TimeSpan.FromSeconds(5)));
 ```
+
+# Examples
+
+## Example #1
+This is an example of a Sparkplug Device publishing a metric named Temperature using the Path **"Plant1/Area3/Line4/Cell2/PLC/PLC-02/Temperature"**. 
+
+### Publish
+```c#
+var client = new UnsClient();
+
+var spBConnection = new UnsSparkplugConnection("localhost", 1883);
+spBConnection.AddDevice("Plant1/Area3/Line4/Cell2/PLC/PLC-02");
+client.AddConnection(spBConnection);
+
+await client.Start();
+await client.Publish("Plant1/Area3/Line4/Cell2/PLC/PLC-02/Temperature", 1);
+```
+
+This gets published to the MQTT broker as shown below:
+
+![Example-01-IMG-01](img/screenshots/sparkplug-plc-publish-example-01.png)
+
+> Notice that the GroupId, NodeId, and DeviceId are all inferred based on the Path
+
+
+### Subscribe
+```c#
+var client = new UnsClient();
+
+var plcNamespaceConfig = new NamespaceConfiguration();
+plcNamespaceConfig.Path = "Plant1/Area3/Line4/Cell2/PLC";
+plcNamespaceConfig.Kind = NamespaceKind.Heterogenous;
+plcNamespaceConfig.Type = NamespaceType.Functional;
+client.AddNamespace(plcNamespaceConfig);
+
+var spBConnection = new UnsSparkplugConnection("localhost", 1883, "testing");
+spBConnection.AddApplication("Plant1/Area3/Line4/Cell2/PLC");
+client.AddConnection(spBConnection);
+
+var consumer = client.Subscribe("Plant1/Area3/Line4/Cell2/PLC/#");
+consumer.Received += (c, o) =>
+{
+    Console.WriteLine("-------------------------");
+    Console.WriteLine($"Path = {o.Path}");
+    Console.WriteLine($"Namespace.Path = {o.Namespace?.Path}");
+    Console.WriteLine($"Namespace.Type = {o.Namespace?.Type}");
+    Console.WriteLine($"Namespace.Kind = {o.Namespace?.Kind}");
+    Console.WriteLine($"Connection.Id = {o.Connection?.Id}");
+    Console.WriteLine($"Connection.Type = {o.Connection?.Type}");
+    Console.WriteLine($"ContentType = {o.ContentType}");
+    Console.WriteLine($"Content = {GetContentString(o.ContentType, o.Content)}");
+    Console.WriteLine($"Timestamp = {o.Timestamp.ToString("o")}");
+};
+
+await client.Start();
+```
+
+This results in the following being written to the console:
+
+![Example-01-IMG-02](img/screenshots/sparkplug-plc-publish-example-02.png)
+
+> Note that the Namespace configuration is automatically applied based on the Path of the Event that is received and that the Sparkplug Metric is parsed as an individual message
