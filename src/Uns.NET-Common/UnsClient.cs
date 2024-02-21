@@ -436,10 +436,10 @@ namespace Uns
         {
             if (!string.IsNullOrEmpty(message.Path) && message.Content != null && message.Content.Length > 0)
             {
-                foreach (var connection in _outputConnections.Values)
+                var sendMessage = ProcessMiddleware(message);
+                if (sendMessage != null)
                 {
-                    var sendMessage = ProcessMiddleware(message);
-                    if (sendMessage != null)
+                    foreach (var connection in _outputConnections.Values)
                     {
                         sendMessage.Connection = connection;
                         sendMessage.Namespace = GetNamespace(sendMessage.Path);
