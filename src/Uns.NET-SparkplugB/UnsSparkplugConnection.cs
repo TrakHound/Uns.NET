@@ -6,10 +6,11 @@ using SparkplugNet.Core.Application;
 using SparkplugNet.Core.Node;
 using SparkplugNet.VersionB;
 using SparkplugNet.VersionB.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
+using Uns.Extensions;
 
 namespace Uns
 {
@@ -51,7 +52,36 @@ namespace Uns
         }
 
 
-        public void AddApplication(string path)
+        //public void AddApplication(string groupId = null, string nodeId = null, string deviceId = null)
+        //{
+        //    var applicationOptions = new SparkplugApplicationOptions(
+        //        brokerAddress: _configuration.Server,
+        //        port: _configuration.Port,
+        //        clientId: _configuration.ClientId,
+        //        userName: _configuration.Username,
+        //        password: _configuration.Password,
+        //        useTls: _configuration.UseTls,
+        //        reconnectInterval: TimeSpan.FromMilliseconds(_defaultReconnectInterval)
+        //        );
+
+        //    var application = new SparkplugApplication(_metrics.Values);
+        //    application.ConnectedAsync += OnConnected;
+        //    application.DisconnectedAsync += OnDisonnected;
+        //    application.NodeDataReceivedAsync += (o) => NodeDataReceivedAsync(groupId, nodeId, o);
+        //    application.NodeBirthReceivedAsync += (o) => NodeBirthReceivedAsync(groupId, nodeId, o);
+        //    application.DeviceBirthReceivedAsync += (o) => DeviceBirthReceivedAsync(groupId, nodeId, deviceId, o);
+        //    application.DeviceDataReceivedAsync += (o) => DeviceDataReceivedAsync(groupId, nodeId, deviceId, o);
+
+        //    var applicationKey = $"{groupId}:{nodeId}:{deviceId}";
+
+        //    _applicationOptions.Remove(applicationKey);
+        //    _applicationOptions.Add(applicationKey, applicationOptions);
+
+        //    _applications.Remove(applicationKey);
+        //    _applications.Add(applicationKey, application);
+        //}
+
+        public void AddApplication(string path = "/")
         {
             if (!string.IsNullOrEmpty(path))
             {
@@ -68,10 +98,10 @@ namespace Uns
                 var application = new SparkplugApplication(_metrics.Values);
                 application.ConnectedAsync += OnConnected;
                 application.DisconnectedAsync += OnDisonnected;
-                application.NodeDataReceivedAsync += NodeDataReceivedAsync;
-                application.NodeBirthReceivedAsync += NodeBirthReceivedAsync;
-                application.DeviceBirthReceivedAsync += DeviceBirthReceivedAsync;
-                application.DeviceDataReceivedAsync += DeviceDataReceivedAsync;
+                application.NodeDataReceivedAsync += (o) => NodeDataReceivedAsync(path, o);
+                application.NodeBirthReceivedAsync += (o) => NodeBirthReceivedAsync(path, o);
+                application.DeviceBirthReceivedAsync += (o) => DeviceBirthReceivedAsync(path, o);
+                application.DeviceDataReceivedAsync += (o) => DeviceDataReceivedAsync(path, o);
 
                 _applicationOptions.Remove(path);
                 _applicationOptions.Add(path, applicationOptions);
@@ -159,17 +189,7 @@ namespace Uns
         }
 
 
-        private Task NodeBirthReceivedAsync(SparkplugBase<Metric>.NodeBirthEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        private Task NodeDataReceivedAsync(SparkplugApplicationBase<Metric>.NodeDataEventArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        private Task DeviceBirthReceivedAsync(SparkplugBase<Metric>.DeviceBirthEventArgs args)
+        private Task NodeBirthReceivedAsync(string basePath, SparkplugBase<Metric>.NodeBirthEventArgs args)
         {
             if (args.Metrics.Count() > 1)
             {
@@ -177,13 +197,18 @@ namespace Uns
                 {
                     if (metric.Name != "bdSeq")
                     {
-                        var message = new UnsEventMessage();
-                        message.Path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.DeviceIdentifier}/{metric.Name}".Replace(':', '/');
-                        message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
-                        message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(metric));
-                        message.Timestamp = SparkplugTimestamp.ToDateTime(metric.Timestamp);
+                        var path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{metric.Name}".Replace(':', '/');
 
-                        ReceiveEvent(message);
+                        if (UnsPath.IsChildOf(basePath, path))
+                        {
+                            var message = new UnsEventMessage();
+                            message.Path = path;
+                            message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
+                            message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(metric));
+                            message.Timestamp = SparkplugTimestamp.ToDateTime(metric.Timestamp);
+
+                            ReceiveEvent(message);
+                        }
                     }
                 }
             }
@@ -191,21 +216,184 @@ namespace Uns
             return Task.CompletedTask;
         }
 
-        private Task DeviceDataReceivedAsync(SparkplugApplicationBase<Metric>.DeviceDataEventArgs args)
+        private Task NodeDataReceivedAsync(string basePath, SparkplugApplicationBase<Metric>.NodeDataEventArgs args)
         {
             if (args.Metric.Name != "bdSeq")
             {
-                var message = new UnsEventMessage();
-                message.Path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.DeviceIdentifier}/{args.Metric.Name}".Replace(':', '/');
-                message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
-                message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(args.Metric));
-                message.Timestamp = SparkplugTimestamp.ToDateTime(args.Metric.Timestamp);
+                var path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.Metric.Name}".Replace(':', '/');
 
-                ReceiveEvent(message);
+                if (UnsPath.IsChildOf(basePath, path))
+                {
+                    var message = new UnsEventMessage();
+                    message.Path = path;
+                    message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
+                    message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(args.Metric));
+                    message.Timestamp = SparkplugTimestamp.ToDateTime(args.Metric.Timestamp);
+
+                    ReceiveEvent(message);
+                }
             }
 
             return Task.CompletedTask;
         }
+
+        private Task DeviceBirthReceivedAsync(string basePath, SparkplugBase<Metric>.DeviceBirthEventArgs args)
+        {
+            if (args.Metrics.Count() > 1)
+            {
+                foreach (var metric in args.Metrics)
+                {
+                    if (metric.Name != "bdSeq")
+                    {
+                        var path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.DeviceIdentifier}/{metric.Name}".Replace(':', '/');
+
+                        if (UnsPath.IsChildOf(basePath, path))
+                        {
+                            var message = new UnsEventMessage();
+                            message.Path = path;
+                            message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
+                            message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(metric));
+                            message.Timestamp = SparkplugTimestamp.ToDateTime(metric.Timestamp);
+
+                            ReceiveEvent(message);
+                        }
+                    }
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private Task DeviceDataReceivedAsync(string basePath, SparkplugApplicationBase<Metric>.DeviceDataEventArgs args)
+        {
+            if (args.Metric.Name != "bdSeq")
+            {
+                var path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.DeviceIdentifier}/{args.Metric.Name}".Replace(':', '/');
+
+                if (UnsPath.IsChildOf(basePath, path))
+                {
+                    var message = new UnsEventMessage();
+                    message.Path = path;
+                    message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
+                    message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(args.Metric));
+                    message.Timestamp = SparkplugTimestamp.ToDateTime(args.Metric.Timestamp);
+
+                    ReceiveEvent(message);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        //private Task NodeBirthReceivedAsync(string groupId, string nodeId, SparkplugBase<Metric>.NodeBirthEventArgs args)
+        //{
+        //    if (args.Metrics.Count() > 1)
+        //    {
+        //        foreach (var metric in args.Metrics)
+        //        {
+        //            if (metric.Name != "bdSeq")
+        //            {
+        //                var path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{metric.Name}".Replace(':', '/');
+
+        //                var match = groupId == null || groupId == args.GroupIdentifier;
+        //                if (match) match = nodeId == null || nodeId == args.EdgeNodeIdentifier;
+
+        //                if (match)
+        //                {
+        //                    var message = new UnsEventMessage();
+        //                    message.Path = path;
+        //                    message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
+        //                    message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(metric));
+        //                    message.Timestamp = SparkplugTimestamp.ToDateTime(metric.Timestamp);
+
+        //                    ReceiveEvent(message);
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    return Task.CompletedTask;
+        //}
+
+        //private Task NodeDataReceivedAsync(string groupId, string nodeId, SparkplugApplicationBase<Metric>.NodeDataEventArgs args)
+        //{
+        //    if (args.Metric.Name != "bdSeq")
+        //    {
+        //        var path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.Metric.Name}".Replace(':', '/');
+
+        //        var match = groupId == null || groupId == args.GroupIdentifier;
+        //        if (match) match = nodeId == null || nodeId == args.EdgeNodeIdentifier;
+
+        //        if (match)
+        //        {
+        //            var message = new UnsEventMessage();
+        //            message.Path = path;
+        //            message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
+        //            message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(args.Metric));
+        //            message.Timestamp = SparkplugTimestamp.ToDateTime(args.Metric.Timestamp);
+
+        //            ReceiveEvent(message);
+        //        }
+        //    }
+
+        //    return Task.CompletedTask;
+        //}
+
+        //private Task DeviceBirthReceivedAsync(string groupId, string nodeId, string deviceId, SparkplugBase<Metric>.DeviceBirthEventArgs args)
+        //{
+        //    if (args.Metrics.Count() > 1)
+        //    {
+        //        foreach (var metric in args.Metrics)
+        //        {
+        //            if (metric.Name != "bdSeq")
+        //            {
+        //                var path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.DeviceIdentifier}/{metric.Name}".Replace(':', '/');
+
+        //                var match = groupId == null || groupId == args.GroupIdentifier;
+        //                if (match) match = nodeId == null || nodeId == args.EdgeNodeIdentifier;
+        //                if (match) match = deviceId == null || deviceId == args.DeviceIdentifier;
+
+        //                if (match)
+        //                {
+        //                    var message = new UnsEventMessage();
+        //                    message.Path = path;
+        //                    message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
+        //                    message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(metric));
+        //                    message.Timestamp = SparkplugTimestamp.ToDateTime(metric.Timestamp);
+
+        //                    ReceiveEvent(message);
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    return Task.CompletedTask;
+        //}
+
+        //private Task DeviceDataReceivedAsync(string groupId, string nodeId, string deviceId, SparkplugApplicationBase<Metric>.DeviceDataEventArgs args)
+        //{
+        //    if (args.Metric.Name != "bdSeq")
+        //    {
+        //        var path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.DeviceIdentifier}/{args.Metric.Name}".Replace(':', '/');
+
+        //        var match = groupId == null || groupId == args.GroupIdentifier;
+        //        if (match) match = nodeId == null || nodeId == args.EdgeNodeIdentifier;
+        //        if (match) match = deviceId == null || deviceId == args.DeviceIdentifier;
+
+        //        if (match)
+        //        {
+        //            var message = new UnsEventMessage();
+        //            message.Path = path;
+        //            message.ContentType = UnsEventContentType.SPARKPLUG_B_METRIC;
+        //            message.Content = System.Text.Encoding.UTF8.GetBytes(Json.Convert(args.Metric));
+        //            message.Timestamp = SparkplugTimestamp.ToDateTime(args.Metric.Timestamp);
+
+        //            ReceiveEvent(message);
+        //        }
+        //    }
+
+        //    return Task.CompletedTask;
+        //}
 
 
         public override async Task Start()

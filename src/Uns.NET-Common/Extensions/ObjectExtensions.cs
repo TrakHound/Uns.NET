@@ -5,9 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 
-namespace Uns
+namespace Uns.Extensions
 {
     public static class ObjectExtensions
     {

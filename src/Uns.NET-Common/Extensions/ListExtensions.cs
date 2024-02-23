@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Uns
+namespace Uns.Extensions
 {
     public static class ListExtensions
     {

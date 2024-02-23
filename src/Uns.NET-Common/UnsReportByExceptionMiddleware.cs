@@ -2,6 +2,7 @@
 // TrakHound Inc. licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using Uns.Extensions;
 
 namespace Uns
 {

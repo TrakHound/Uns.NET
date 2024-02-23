@@ -11,6 +11,7 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using Uns.Extensions;
 
 namespace Uns
 {
@@ -82,8 +83,6 @@ namespace Uns
         /// Raised when a Message is received
         /// </summary>
         public event EventHandler<MqttApplicationMessage> MessageReceived;
-
-        //public Func<MqttApplicationMessage, Task> MessageReceived;
 
         /// <summary>
         /// Raised when any Response from the Client is received
@@ -312,7 +311,7 @@ namespace Uns
             }
         }
 
-        public void AddDestination(string pattern, string topic = null)
+        public void AddDestination(string pattern = "/", string topic = null)
         {
             if (!string.IsNullOrEmpty(pattern))
             {

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Uns.Extensions;
 
 namespace Uns
 {
@@ -127,10 +128,6 @@ namespace Uns
                         return string.Join(new string(new char[] { PathSeparator }), relativeParts);
                     }
                 }
-
-
-                //var result = System.IO.Path.GetRelativePath(relativePath, path);
-                //return result?.Replace('\\', '/');
             }
 
             return path;
@@ -168,6 +165,8 @@ namespace Uns
         {
             if (!string.IsNullOrEmpty(parentPath) && !string.IsNullOrEmpty(path))
             {
+                if (parentPath == "/") return true;
+
                 var parentPaths = GetPaths(parentPath).ToArray();
                 var paths = GetPaths(path).ToArray();
 

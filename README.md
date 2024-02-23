@@ -11,7 +11,7 @@
 
 # Nuget
 ```
-dotnet add package Uns.NET --version 0.1.0-beta
+dotnet add package Uns.NET
 ```
 
 # UnsClient

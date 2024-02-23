@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Uns.Extensions;
 
 namespace Uns
 {
@@ -42,7 +43,9 @@ namespace Uns
         /// </summary>
         public event EventHandler ClientStopped;
 
-
+        /// <summary>
+        /// Raised when a new UNS Event is Received
+        /// </summary>
         public event EventHandler<UnsEventMessage> EventReceived;
 
 
