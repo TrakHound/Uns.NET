@@ -227,6 +227,7 @@ namespace Uns
         public UnsConsumer Subscribe(string pattern)
         {
             var consumer = new UnsConsumer(pattern);
+            consumer.OnDisposed = ConsumerDisposed;
 
             lock (_lock)
             {
@@ -242,6 +243,7 @@ namespace Uns
         public UnsConsumer<TResult> Subscribe<TResult>(string pattern)
         {
             var consumer = new UnsConsumer<TResult>(pattern);
+            consumer.OnDisposed = ConsumerDisposed;
 
             lock (_lock)
             {
@@ -257,6 +259,7 @@ namespace Uns
         public UnsJsonConsumer<TModel> SubscribeJson<TModel>(string pattern)
         {
             var consumer = new UnsJsonConsumer<TModel>(pattern);
+            consumer.OnDisposed = ConsumerDisposed;
 
             lock (_lock)
             {
@@ -269,6 +272,17 @@ namespace Uns
             return consumer;
         }
 
+        private void ConsumerDisposed(string consumerId)
+        {
+            if (consumerId != null)
+            {
+                lock (_lock)
+                {
+                    _consumers.Remove(consumerId);
+                }
+            }
+        }
+
 
         private void ConnectionEventReceived(IUnsConnection connection, UnsEventMessage message)
         {
@@ -279,8 +293,12 @@ namespace Uns
         {
             if (message != null && !string.IsNullOrEmpty(message.Path) && message.Content != null)
             {
-                IEnumerable<IUnsConsumer> consumers;
-                lock (_lock) consumers = _consumers.Values;
+                var consumers = new List<IUnsConsumer>();
+                lock (_lock)
+                {
+                    foreach (var consumer in _consumers.Values) consumers.Add(consumer);
+                }
+
                 foreach (var consumer in consumers)
                 {
                     if (MatchPattern(consumer.Pattern, message.Path))

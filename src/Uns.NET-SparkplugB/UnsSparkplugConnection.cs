@@ -266,6 +266,7 @@ namespace Uns
 
         private Task DeviceDataReceivedAsync(string basePath, SparkplugApplicationBase<Metric>.DeviceDataEventArgs args)
         {
+            
             if (args.Metric.Name != "bdSeq")
             {
                 var path = $"{args.GroupIdentifier}/{args.EdgeNodeIdentifier}/{args.DeviceIdentifier}/{args.Metric.Name}".Replace(':', '/');

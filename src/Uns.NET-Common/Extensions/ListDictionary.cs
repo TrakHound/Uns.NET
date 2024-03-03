@@ -8,7 +8,8 @@ namespace Uns.Extensions
 {
     public class ListDictionary<TKey, TValue>
     {
-        private readonly Dictionary<TKey, List<TValue>> _dictionary = new Dictionary<TKey, List<TValue>>();
+        private readonly Dictionary<TKey, HashSet<TValue>> _dictionary = new Dictionary<TKey, HashSet<TValue>>();
+        //private readonly Dictionary<TKey, List<TValue>> _dictionary = new Dictionary<TKey, List<TValue>>();
         private readonly object _lock = new object();
         private int _count = 0;
 
@@ -59,7 +60,7 @@ namespace Uns.Extensions
                     }
                     else
                     {
-                        List<TValue> list = new List<TValue>();
+                        HashSet<TValue> list = new HashSet<TValue>();
                         list.Add(value);
                         _count++;
                         _dictionary.Add(key, list);
@@ -91,8 +92,8 @@ namespace Uns.Extensions
                     }
                     else
                     {
-                        List<TValue> list = new List<TValue>();
-                        list.AddRange(values);
+                        HashSet<TValue> list = new HashSet<TValue>();
+                        foreach (var value in values) list.Add(value);
                         _count += values.Count();
                         _dictionary.Add(key, list);
                     }

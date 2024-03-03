@@ -5,7 +5,7 @@ using System;
 
 namespace Uns
 {
-    public interface IUnsConsumer
+    public interface IUnsConsumer : IDisposable
     {
         string Id { get; }
 

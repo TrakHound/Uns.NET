@@ -29,6 +29,8 @@ namespace Uns
 
         public event EventHandler<TResult> Received;
 
+        public Action<string> OnDisposed { get; set; }
+
 
         public UnsConsumer(string pattern, Func<UnsEventMessage, TResult> processFunction = null)
         {
@@ -36,6 +38,12 @@ namespace Uns
             _pattern = pattern;
             _processFunction = processFunction != null ? processFunction : DefaultProcessFunction;
         }
+
+        public void Dispose()
+        {
+            if (OnDisposed != null) OnDisposed(_id);
+        }
+
 
         public void Push(UnsEventMessage message)
         {
